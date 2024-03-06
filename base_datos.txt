@@ -1,0 +1,7 @@
+
+Name: admin
+Email:admin@gmail.comPassword:admin
+
+Name: prueba1
+Email:prueba1@gmail.comPassword:prueba
+

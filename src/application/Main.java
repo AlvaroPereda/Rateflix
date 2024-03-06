@@ -10,12 +10,12 @@ public class Main extends Application {
     @Override
     public void start(Stage pantallaInicio) throws Exception {
         // Cargar la interfaz de usuario desde el archivo FXML
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("PantallaInicio.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("PantallaAcceso.fxml"));
         Parent root = loader.load();
 
         // Configurar la ventana principal
         pantallaInicio.setTitle("Rateflix");
-        pantallaInicio.setScene(new Scene(root, 600, 600));
+        pantallaInicio.setScene(new Scene(root));
         pantallaInicio.show();
     }
 	

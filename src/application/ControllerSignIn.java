@@ -57,46 +57,47 @@ public class ControllerSignIn {
 			}
 			else if(comprobarCredenciales(userEmail.getText(), userPassword.getText())) {
 				error.setText("Welcome"); 
+				
+				String sql = "SELECT idusername FROM data WHERE email = ?";
+		        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+		            statement.setString(1, userEmail.getText());
+
+		            // Ejecutar la consulta SQL
+		            try (ResultSet resultSet = statement.executeQuery()) {
+		                if (resultSet.next()) {
+		                    idusername = resultSet.getInt("idusername");
+		                }
+		            }
+		    } catch (SQLException e) {
+		        e.printStackTrace();
+		    }
+		        
+				
+				try {       
+			        Stage pantallaSignInStage = (Stage) inicioAnchorPane.getScene().getWindow();
+			        pantallaSignInStage.close();
+					
+					FXMLLoader loader = new FXMLLoader(getClass().getResource("PantallaInicio.fxml"));
+					Parent root = loader.load();
+					Scene scene = new Scene(root);
+					
+					Stage inicioStage = new Stage();
+
+					inicioStage.setTitle("Rateflix");
+					inicioStage.setScene(scene);
+
+					
+					inicioStage.show();
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 			else {
 				error.setText("Email or password are not correct");
 			}
 		}
 		
-		String sql = "SELECT idusername FROM data WHERE email = ?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, userEmail.getText());
-
-            // Ejecutar la consulta SQL
-            try (ResultSet resultSet = statement.executeQuery()) {
-                if (resultSet.next()) {
-                    idusername = resultSet.getInt("idusername");
-                }
-            }
-    } catch (SQLException e) {
-        e.printStackTrace();
-    }
-        
-		
-		try {       
-	        Stage pantallaSignInStage = (Stage) inicioAnchorPane.getScene().getWindow();
-	        pantallaSignInStage.close();
-			
-			FXMLLoader loader = new FXMLLoader(getClass().getResource("PantallaInicio.fxml"));
-			Parent root = loader.load();
-			Scene scene = new Scene(root);
-			
-			Stage inicioStage = new Stage();
-
-			inicioStage.setTitle("Rateflix");
-			inicioStage.setScene(scene);
-
-			
-			inicioStage.show();
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 	
 	private void guardarCredenciales(String username, String email, String password) throws SQLException {

@@ -18,8 +18,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 
-
-
 public class ControllerSignIn {
 	
 	@FXML
@@ -32,12 +30,14 @@ public class ControllerSignIn {
     private AnchorPane inicioAnchorPane;
 	
 	
-	private static int idusername;
+	private static int SQLidusername;
+	private static String SQLemail;
+	private static String SQLpassword;
+	private static String SQLusername;
+	
 	private Boolean signIn=true;
 	static Connection connection = null;
-	static String databaseName = "rateflix";
-	static String url = "jdbc:mysql://localhost:3306/" + databaseName + "?serverTimezone=UTC";
- 
+	static String url = "jdbc:mysql://localhost:3306/rateflix?serverTimezone=UTC";
 	static String usernameGlobal = "admin";
 	static String passwordGlobal = "admin";
 	
@@ -49,6 +49,8 @@ public class ControllerSignIn {
 			}
 			else {				
 				guardarCredenciales(userNameText.getText(),userEmail.getText(), userPassword.getText());
+				saveData();
+				openWindow();
 			}
 		}
 		else {
@@ -56,42 +58,8 @@ public class ControllerSignIn {
 				error.setText("Please enter email and password"); 
 			}
 			else if(comprobarCredenciales(userEmail.getText(), userPassword.getText())) {
-				error.setText("Welcome"); 
-				
-				String sql = "SELECT idusername FROM data WHERE email = ?";
-		        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-		            statement.setString(1, userEmail.getText());
-
-		            // Ejecutar la consulta SQL
-		            try (ResultSet resultSet = statement.executeQuery()) {
-		                if (resultSet.next()) {
-		                    idusername = resultSet.getInt("idusername");
-		                }
-		            }
-		    } catch (SQLException e) {
-		        e.printStackTrace();
-		    }
-		        
-				
-				try {       
-			        Stage pantallaSignInStage = (Stage) inicioAnchorPane.getScene().getWindow();
-			        pantallaSignInStage.close();
-					
-					FXMLLoader loader = new FXMLLoader(getClass().getResource("PantallaInicio.fxml"));
-					Parent root = loader.load();
-					Scene scene = new Scene(root);
-					
-					Stage inicioStage = new Stage();
-
-					inicioStage.setTitle("Rateflix");
-					inicioStage.setScene(scene);
-
-					
-					inicioStage.show();
-
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				saveData();
+				openWindow();
 			}
 			else {
 				error.setText("Email or password are not correct");
@@ -101,23 +69,13 @@ public class ControllerSignIn {
 	}
 	
 	private void guardarCredenciales(String username, String email, String password) throws SQLException {
-
 		connection = DriverManager.getConnection(url,usernameGlobal,passwordGlobal);
 		PreparedStatement ps = connection.prepareStatement("INSERT INTO `data` (`email`, `password`, `username`) VALUES ('"+email+"', '"+password+"', '"+username+"');");
-		
-		int status = ps.executeUpdate();
-		
-		if(status != 0) {
-			System.out.println("Database was connection");
-			System.out.println("Record was INSERTED");
-		}
+		ps.executeUpdate();
     }
 	 private boolean comprobarCredenciales(String email, String password) {
 		 try {
-	            // Establecer la conexión
 	            connection = DriverManager.getConnection(url, usernameGlobal, passwordGlobal);
-
-	            // Consulta SQL para verificar las credenciales
 	            String sql = "SELECT * FROM data WHERE email = ? AND password = ?";
 	            try (PreparedStatement statement = connection.prepareStatement(sql)) {
 	                statement.setString(1, email);
@@ -133,16 +91,65 @@ public class ControllerSignIn {
 	        }
 	        return false;
 	    }
+	 
+	private void saveData() {
+		SQLemail = userEmail.getText();
+		SQLpassword = userPassword.getText();
+		
+		String sql = "SELECT idusername, username FROM data WHERE email = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, userEmail.getText());
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    SQLidusername = resultSet.getInt("idusername");
+                    SQLusername = resultSet.getString("username");
+                }
+            }
+        } catch (SQLException e) {
+        	e.printStackTrace();
+        }
+		
+	}
+	private void openWindow() {
+		try {       
+	        Stage pantallaSignInStage = (Stage) inicioAnchorPane.getScene().getWindow();
+	        pantallaSignInStage.close();
+			
+			FXMLLoader loader = new FXMLLoader(getClass().getResource("PantallaInicio.fxml"));
+			Parent root = loader.load();
+			Scene scene = new Scene(root);
+			
+			Stage inicioStage = new Stage();
+
+			inicioStage.setTitle("Rateflix");
+			inicioStage.setScene(scene);
+
+			
+			inicioStage.show();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 	
-	public void setInvisible()
-	{
+	
+	public void setInvisible() {
 		userNameText.setVisible(false);
 		userNameLabel.setVisible(false);
 	}
 	public void setLoginIn() {
 		this.signIn = false;
 	}
-	public int getIdusername() {
-		return idusername;
+	public int getSQLidusername() {
+		return SQLidusername;
+	}
+	public String getSQLemail() {
+		return SQLemail;
+	}
+	public String getSQLpassword() {
+		return SQLpassword;
+	}
+	public String getSQLusername() {
+		return SQLusername;
 	}
 }
